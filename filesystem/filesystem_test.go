@@ -606,7 +606,7 @@ func TestAvbFilesystemFingerprintExpansionDependencies(t *testing.T) {
 	`)
 	partition := result.ModuleForTests(t, "microdroid", "android_common")
 	config := android.ContentFromFileRuleForTests(t, result.TestContext, partition.Output("prop_pre_processing"))
-	fingerprint := result.Config.BuildSystemFingerprintFile(result.TestContext).String()
+	fingerprint := result.Config.BuildSystemFingerprintFile(android.PathContextForTesting(result.Config)).String()
 	android.AssertStringDoesContain(t, "AVB system fingerprint expansion", config,
 		"com.android.build.system.fingerprint:{CONTENTS_OF:"+fingerprint+"}")
 	// The image already depends on this file. Its preceding metadata expansion
