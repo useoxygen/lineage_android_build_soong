@@ -606,13 +606,13 @@ func TestAvbFilesystemFingerprintExpansionDependencies(t *testing.T) {
 	`)
 	partition := result.ModuleForTests(t, "microdroid", "android_common")
 	config := android.ContentFromFileRuleForTests(t, result.TestContext, partition.Output("prop_pre_processing"))
-	fingerprint := result.Config.BuildSystemFingerprintFile(result.TestContext).String()
+	fingerprint := result.Config.BuildSystemFingerprintFile(android.PathContextForTesting(result.Config))
 	android.AssertStringDoesContain(t, "AVB system fingerprint expansion", config,
-		"com.android.build.system.fingerprint:{CONTENTS_OF:"+fingerprint+"}")
+		"com.android.build.system.fingerprint:{CONTENTS_OF:"+fingerprint.String()+"}")
 	// The image already depends on this file. Its preceding metadata expansion
 	// must depend on it too, otherwise a rebuild signs stale literal AVB props.
 	android.AssertStringListContains(t, "fingerprint input to expanded AVB metadata",
-		partition.Output("prop").Implicits.Strings(), fingerprint)
+		partition.Output("prop").Implicits.Strings(), android.PathRelativeToTop(fingerprint))
 }
 
 func TestF2fsPartition(t *testing.T) {
