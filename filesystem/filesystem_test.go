@@ -594,6 +594,27 @@ func TestErofsPartition(t *testing.T) {
 	android.AssertStringDoesContain(t, "erofs fs type sparse", buildImageConfig, "erofs_sparse_flag=-s")
 }
 
+func TestAvbFilesystemFingerprintExpansionDependencies(t *testing.T) {
+	t.Parallel()
+	result := fixture.RunTestWithBp(t, `
+		android_system_image {
+			name: "microdroid",
+			partition_name: "system",
+			use_avb: true,
+			type: "erofs",
+		}
+	`)
+	partition := result.ModuleForTests(t, "microdroid", "android_common")
+	config := android.ContentFromFileRuleForTests(t, result.TestContext, partition.Output("prop_pre_processing"))
+	fingerprint := result.Config.BuildSystemFingerprintFile(result.TestContext).String()
+	android.AssertStringDoesContain(t, "AVB system fingerprint expansion", config,
+		"com.android.build.system.fingerprint:{CONTENTS_OF:"+fingerprint+"}")
+	// The image already depends on this file. Its preceding metadata expansion
+	// must depend on it too, otherwise a rebuild signs stale literal AVB props.
+	android.AssertStringListContains(t, "fingerprint input to expanded AVB metadata",
+		partition.Output("prop").Implicits.Strings(), fingerprint)
+}
+
 func TestF2fsPartition(t *testing.T) {
 	t.Parallel()
 	result := fixture.RunTestWithBp(t, `

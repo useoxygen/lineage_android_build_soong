@@ -1523,9 +1523,10 @@ func (f *filesystem) buildPropFile(ctx android.ModuleContext) (android.Path, and
 	android.WriteFileRule(ctx, propFilePreProcessing, strings.Join(lines, "\n"))
 	propFile := android.PathForModuleOut(ctx, "prop")
 	ctx.Build(pctx, android.BuildParams{
-		Rule:   textFileProcessorRule,
-		Input:  propFilePreProcessing,
-		Output: propFile,
+		Rule:      textFileProcessorRule,
+		Input:     propFilePreProcessing,
+		Output:    propFile,
+		Implicits: deps,
 	})
 	return propFile, deps
 }
