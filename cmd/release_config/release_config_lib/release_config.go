@@ -19,7 +19,6 @@ import (
 	"cmp"
 	"fmt"
 	"maps"
-	"os"
 	"path/filepath"
 	"regexp"
 	"slices"
@@ -27,6 +26,7 @@ import (
 
 	rc_proto "android/soong/cmd/release_config/release_config_proto"
 
+	"github.com/google/blueprint/pathtools"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -591,7 +591,8 @@ func (config *ReleaseConfig) WriteMakefile(outFile, targetRelease string, config
 	for _, name := range names {
 		fmt.Fprintf(&sb, "%s :=$= %s\n", name, makeVars[name])
 	}
-	return os.WriteFile(outFile, sb.Bytes(), 0644)
+	// Kati watches this input by mtime; identical flags must not regenerate Make.
+	return pathtools.WriteFileIfChanged(outFile, sb.Bytes(), 0644)
 }
 
 func (config *ReleaseConfig) WritePartitionBuildFlags(product string, outDir string) error {
